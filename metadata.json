@@ -1,0 +1,6 @@
+{
+  "name": "Asset Scout",
+  "description": "An interactive DSR system for employees to log daily tasks, view history, analyze progress charts, and dynamically define custom submission fields.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
