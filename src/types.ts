@@ -3,6 +3,8 @@ export interface Project {
   name: string;
   code: string;
   description?: string;
+  domain?: string;
+  frequency?: string;
 }
 
 export interface ProjectWork {
@@ -11,8 +13,12 @@ export interface ProjectWork {
   projectName: string;
   listingCount: number; // Listing submissions count
   blogCount: number; // Blog submissions count
+  forumCount?: number; // Forum submissions count
   pdfCount: number; // PDF submissions count
   imageCount: number; // Image submissions count
+  videoPptCount?: number; // Video / PPT submissions count
+  profileCount?: number; // Profile submissions count
+  linkCount?: number; // Link submissions count
   blog?: string; // Legacy blog section details
   pdfName?: string; // Legacy PDF File name
   pdfSize?: string; // Legacy PDF File size

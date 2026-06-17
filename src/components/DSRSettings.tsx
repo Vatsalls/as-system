@@ -60,6 +60,7 @@ interface DSRSettingsProps {
   onSetAllowedUsers: React.Dispatch<React.SetStateAction<AppUser[]>>;
   projectLocations: ProjectLocation[];
   onSetProjectLocations: React.Dispatch<React.SetStateAction<ProjectLocation[]>>;
+  onUpdateProjects?: (updatedProjects: Project[]) => void;
 }
 
 export default function DSRSettings({
@@ -83,11 +84,13 @@ export default function DSRSettings({
   onSetAllowedUsers,
   projectLocations,
   onSetProjectLocations,
+  onUpdateProjects,
 }: DSRSettingsProps) {
   // Navigation Tabs inside Settings Panel
-  const [activeSubTab, setActiveSubTab] = useState<'sheets' | 'metrics' | 'users' | 'admins'>('sheets');
+  const [activeSubTab, setActiveSubTab] = useState<'sheets' | 'projects' | 'metrics' | 'users' | 'admins'>('sheets');
 
   // Input states
+  const [projectsSearch, setProjectsSearch] = useState('');
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [spreadsheetUrlInput, setSpreadsheetUrlInput] = useState(sheetSettings.spreadsheetId);
   const [projectsTabInput, setProjectsTabInput] = useState(sheetSettings.projectsTab || 'Projects');
@@ -261,6 +264,17 @@ export default function DSRSettings({
           Google Sheets Database Link
         </button>
         <button
+          onClick={() => setActiveSubTab('projects')}
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs cursor-pointer transition ${
+            activeSubTab === 'projects'
+              ? 'border-indigo-600 text-indigo-700'
+              : 'border-transparent text-gray-400 hover:text-gray-700 hover:border-gray-200'
+          }`}
+        >
+          <Database size={15} />
+          Campaign Projects
+        </button>
+        <button
           onClick={() => setActiveSubTab('metrics')}
           className={`flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-xs cursor-pointer transition ${
             activeSubTab === 'metrics'
@@ -320,7 +334,6 @@ export default function DSRSettings({
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-5">
               <div className="space-y-1">
                 <h4 className="font-extrabold text-gray-900 text-sm">Google Sheets Live Sync Hub</h4>
-                <p className="text-xs text-gray-400">Integrate dynamic external Google Sheets to power active projects and record teammate reports in real-time.</p>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
                 <span className={`inline-flex w-2.5 h-2.5 rounded-full ${sheetSettings.isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-400'}`}></span>
@@ -462,12 +475,124 @@ export default function DSRSettings({
           </div>
         )}
 
+        {/* CAMPAIGN PROJECTS REGISTRY SUBTAB */}
+        {activeSubTab === 'projects' && (
+          <div className="space-y-8 animate-fade-in text-left">
+            <div className="border-b border-gray-100 pb-5">
+              <h4 className="font-extrabold text-gray-900 text-sm">Campaign Projects Registry</h4>
+            </div>
+
+            {/* Filter text field */}
+            <div className="flex max-w-sm">
+              <input
+                type="text"
+                placeholder="Filter by project code or name..."
+                value={projectsSearch}
+                onChange={(e) => setProjectsSearch(e.target.value)}
+                className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold focus:outline-none focus:ring-1 focus:ring-indigo-600 transition"
+              />
+            </div>
+
+            <div className="overflow-x-auto border border-gray-150 rounded-2xl shadow-3xs bg-white">
+              <table className="w-full text-left text-xs min-w-[700px]">
+                <thead className="bg-slate-50 border-b border-gray-150 text-[10px] text-gray-450 uppercase font-black tracking-wider">
+                  <tr>
+                    <th className="px-4 py-3.5 w-16">Sr No.</th>
+                    <th className="px-4 py-3.5 w-1/4">Project Code & Name</th>
+                    <th className="px-4 py-3.5 w-1/3">Website Campaign Domain</th>
+                    <th className="px-4 py-3.5 w-1/3">Assigned Frequency</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-150">
+                  {projects
+                    .filter(proj => 
+                      proj.name.toLowerCase().includes(projectsSearch.toLowerCase()) || 
+                      proj.code.toLowerCase().includes(projectsSearch.toLowerCase())
+                    )
+                    .map((proj, idx) => {
+                      const isPresetFreq = ['Daily', 'Weekly', 'Monthly', 'Bi-weekly'].includes(proj.frequency || '');
+                      return (
+                        <tr key={proj.id} className="hover:bg-slate-50/50 transition duration-100">
+                          <td className="px-4 py-3 font-mono font-bold text-gray-400">{idx + 1}</td>
+                          <td className="px-4 py-3">
+                            <span className="font-bold text-gray-900 block">{proj.name}</span>
+                            <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded font-black mt-1 inline-block uppercase">{proj.code}</span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <input
+                              type="text"
+                              placeholder="e.g. example.com"
+                              value={proj.domain || ''}
+                              onChange={(e) => {
+                                if (onUpdateProjects) {
+                                  const next = projects.map(p => p.id === proj.id ? { ...p, domain: e.target.value } : p);
+                                  onUpdateProjects(next);
+                                }
+                              }}
+                              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600 transition"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-2">
+                              <select
+                                value={isPresetFreq ? proj.frequency : 'Custom'}
+                                onChange={(e) => {
+                                  if (onUpdateProjects) {
+                                    const val = e.target.value;
+                                    const next = projects.map(p => {
+                                      if (p.id === proj.id) {
+                                        return { ...p, frequency: val === 'Custom' ? (p.frequency || 'Daily') : val };
+                                      }
+                                      return p;
+                                    });
+                                    onUpdateProjects(next);
+                                  }
+                                }}
+                                className="px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-1 focus:ring-indigo-600 transition shrink-0"
+                              >
+                                <option value="Daily">Daily</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="Monthly">Monthly</option>
+                                <option value="Bi-weekly">Bi-weekly</option>
+                                <option value="Custom">Custom...</option>
+                              </select>
+
+                              <input
+                                type="text"
+                                placeholder="Type custom frequency..."
+                                disabled={isPresetFreq}
+                                value={proj.frequency || ''}
+                                onChange={(e) => {
+                                  if (onUpdateProjects) {
+                                    const next = projects.map(p => p.id === proj.id ? { ...p, frequency: e.target.value } : p);
+                                    onUpdateProjects(next);
+                                  }
+                                }}
+                                className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600 transition disabled:opacity-50 disabled:bg-gray-100"
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  {projects.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-4 py-8 text-center text-gray-400 font-medium font-mono text-xs">
+                        No active projects registered yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* TAB 2: Dynamic Custom Metrics */}
         {activeSubTab === 'metrics' && (
           <div className="space-y-8 animate-fade-in">
             <div className="border-b border-gray-100 pb-5">
               <h4 className="font-extrabold text-gray-900 text-sm">Dynamic Custom Backlink Types</h4>
-              <p className="text-xs text-gray-400">Add dynamic submission metric fields beyond standard Listings, Blogs, PDFs, and Images. Instructors can see and configure these immediately.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -696,7 +821,6 @@ export default function DSRSettings({
           <div className="space-y-8 animate-fade-in">
             <div className="border-b border-gray-100 pb-5">
               <h4 className="font-extrabold text-gray-900 text-sm">Privileged Admin Emails</h4>
-              <p className="text-xs text-gray-400">Invite trusted business accounts to clear submissions blocks and access real-time status visualizers.</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

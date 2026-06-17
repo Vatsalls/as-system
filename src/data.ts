@@ -7,10 +7,10 @@ export const ADMIN_EMAILS = [
 ];
 
 export const DEFAULT_PROJECTS: Project[] = [
-  { id: 'proj-1', name: 'Phoenix Redesign', code: 'PHX-RD', description: 'Modernizing internal workspace suite' },
-  { id: 'proj-2', name: 'Apollo Cloud Platform', code: 'APL-CP', description: 'Next-gen cloud migration and hosting infrastructure' },
-  { id: 'proj-3', name: 'Infinity Portal Dev', code: 'INF-PD', description: 'Building unified client facing interfaces' },
-  { id: 'proj-4', name: 'Core API Integration', code: 'COR-API', description: 'Exposing third-party platform integration endpoints' }
+  { id: 'proj-1', name: 'Phoenix Redesign', code: 'PHX-RD', description: 'Modernizing internal workspace suite', domain: 'phoenix-workspace.com', frequency: 'Daily' },
+  { id: 'proj-2', name: 'Apollo Cloud Platform', code: 'APL-CP', description: 'Next-gen cloud migration and hosting infrastructure', domain: 'apolloCloud.io', frequency: 'Weekly' },
+  { id: 'proj-3', name: 'Infinity Portal Dev', code: 'INF-PD', description: 'Building unified client facing interfaces', domain: 'infinity-portal.co', frequency: 'Monthly' },
+  { id: 'proj-4', name: 'Core API Integration', code: 'COR-API', description: 'Exposing third-party platform integration endpoints', domain: 'core-api-integration.com', frequency: 'Daily' }
 ];
 
 // Seed some entries conforming to DSREntry with works list!

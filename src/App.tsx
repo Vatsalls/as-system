@@ -33,7 +33,8 @@ import {
   FileSpreadsheet,
   Building2,
   HardDriveUpload,
-  UserCheck
+  UserCheck,
+  Bell
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -100,6 +101,33 @@ export default function App() {
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+
+  const [alerts, setAlerts] = useState<any[]>(() => {
+    try {
+      const saved = localStorage.getItem('dsr_admin_alerts');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('dsr_admin_alerts', JSON.stringify(alerts));
+  }, [alerts]);
+
+  const handleAddAlert = (alert: any) => {
+    setAlerts(prev => [alert, ...prev]);
+  };
+
+  const handleMarkAllAlertsAsRead = () => {
+    setAlerts(prev => prev.map(a => ({ ...a, read: true })));
+  };
+
+  const handleClearAlert = (id: string) => {
+    setAlerts(prev => prev.filter(a => a.id !== id));
+  };
 
   const [entries, setEntries] = useState<DSREntry[]>(() => {
     const saved = localStorage.getItem('dsr_entries');
@@ -227,6 +255,8 @@ export default function App() {
 
   // Derived user parameters
   const isAdmin = currentUserEmail ? adminEmails.some(adm => adm.toLowerCase() === currentUserEmail.trim().toLowerCase()) : false;
+  const unreadCount = alerts.filter(a => !a.read).length;
+  const [filteredLogsCount, setFilteredLogsCount] = useState<number | null>(null);
 
   // Actions
   const handleLogin = (email: string) => {
@@ -533,6 +563,86 @@ export default function App() {
 
             {/* Right Side: Account Actions & Logouts */}
             <div className="flex items-center gap-3">
+              {/* Notifications Bell */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className={`p-2 border border-gray-150 hover:bg-slate-50 text-gray-500 hover:text-indigo-600 rounded-xl transition cursor-pointer relative ${showNotifications ? 'bg-indigo-50/50 text-indigo-600 border-indigo-200' : ''}`}
+                  title="Notifications & Alerts"
+                >
+                  <Bell size={15} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white ring-2 ring-white">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-150 rounded-2xl shadow-lg py-3 z-50 animate-fade-in divide-y divide-gray-100 max-h-[400px] overflow-y-auto">
+                    <div className="px-4 pb-2 flex justify-between items-center">
+                      <span className="font-extrabold text-xs text-gray-900 uppercase tracking-wider flex items-center gap-1.5 font-sans">
+                        <Bell size={12} className="text-indigo-600" />
+                        Admin Alerts
+                      </span>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={handleMarkAllAlertsAsRead}
+                          className="text-[10px] text-indigo-600 hover:underline font-extrabold uppercase font-sans"
+                        >
+                          Mark all read
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="py-1">
+                      {alerts.length === 0 ? (
+                        <div className="px-4 py-6 text-center text-xs text-gray-400 font-medium font-mono italic">
+                          No alerts from administrator yet.
+                        </div>
+                      ) : (
+                        alerts.map((alert) => (
+                          <div
+                            key={alert.id}
+                            className={`px-4 py-3 text-left relative hover:bg-slate-50/50 transition-colors ${!alert.read ? 'bg-indigo-50/10 font-bold' : ''}`}
+                          >
+                            <div className="flex justify-between items-start gap-2">
+                              <div>
+                                <span className="inline-block bg-indigo-50 text-indigo-700 font-black px-1.5 py-0.5 rounded text-[8px] uppercase tracking-wider mb-1">
+                                  {alert.projectName}
+                                </span>
+                                {alert.projectDomain && (
+                                  <span className="text-[8px] text-gray-405 font-medium ml-1">
+                                    ({alert.projectDomain})
+                                  </span>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleClearAlert(alert.id)}
+                                className="text-gray-400 hover:text-rose-600 text-[12px] p-0.5 leading-none font-bold"
+                                title="Dismiss Alert"
+                              >
+                                &times;
+                              </button>
+                            </div>
+                            <p className="text-[11px] font-semibold text-gray-750 leading-relaxed mt-1 whitespace-pre-wrap">
+                              {alert.message}
+                            </p>
+                            <div className="flex justify-between items-center mt-2 text-[8px] text-gray-405 font-bold font-mono uppercase">
+                              <span>By {alert.adminEmail}</span>
+                              <span>{new Date(alert.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                            {!alert.read && (
+                              <span className="absolute left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Profile card badge */}
               <div className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 bg-gray-50 border border-gray-150 rounded-xl text-xs max-w-64">
                 {isAdmin ? (
@@ -624,17 +734,14 @@ export default function App() {
                 {activeTab === 'dashboard' && 'Team Progress Analytics'}
                 {activeTab === 'settings' && 'System Configuration Studio'}
               </h1>
-              <p className="text-xs text-gray-550 font-semibold">
-                {activeTab === 'submit' && `Welcome back. Add your listings, blog activities, and file submissions.`}
-                {activeTab === 'logs' && 'Chronological register of work logs submitted across the active workspace.'}
-                {activeTab === 'dashboard' && 'Corporate tracking overview, cumulative work output speeds, and reporting stats.'}
-                {activeTab === 'settings' && 'Add customized submission formats, manage core active projects, and authorize permissions.'}
-              </p>
             </div>
 
-            <div className="flex items-center gap-2 text-xs font-mono text-gray-400">
-              <Building2 size={13} className="text-gray-300" />
-              <span>Workspace: Enterprise Development Group</span>
+            <div className="flex items-center gap-2 text-xs">
+              {activeTab === 'logs' && (
+                <span className="bg-indigo-50 border border-indigo-200/60 text-indigo-700 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-2xs">
+                  ⚡ Total Logs: <strong>{filteredLogsCount !== null ? filteredLogsCount : 0} logs</strong>
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -668,6 +775,8 @@ export default function App() {
                   isAdmin={isAdmin}
                   customSubmissionTypes={customSubmissionTypes}
                   allowedUsers={allowedUsers}
+                  currentUserEmail={currentUserEmail}
+                  onFilteredCountChange={setFilteredLogsCount}
                 />
               )}
 
@@ -677,6 +786,11 @@ export default function App() {
                   projects={projects}
                   allowedUsers={allowedUsers}
                   projectLocations={projectLocations}
+                  isAdmin={isAdmin}
+                  currentUserEmail={currentUserEmail || ''}
+                  customSubmissionTypes={customSubmissionTypes}
+                  alerts={alerts}
+                  onAddAlert={handleAddAlert}
                 />
               )}
 
@@ -699,6 +813,7 @@ export default function App() {
                   onSetAllowedUsers={setAllowedUsers}
                   projectLocations={projectLocations}
                   onSetProjectLocations={setProjectLocations}
+                  onUpdateProjects={setProjects}
                 />
               )}
             </motion.div>

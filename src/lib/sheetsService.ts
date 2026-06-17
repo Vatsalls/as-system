@@ -81,7 +81,7 @@ export async function appendSubmissionsToSheet(
   token: string
 ): Promise<boolean> {
   const cleanId = extractSpreadsheetId(spreadsheetId);
-  const range = encodeURIComponent(`${sheetName}!A1:O1`);
+  const range = encodeURIComponent(`${sheetName}!A1:S1`);
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${cleanId}/values/${range}:append?valueInputOption=USER_ENTERED`;
 
   // Standard submission log headers schema with added columns
@@ -100,7 +100,11 @@ export async function appendSubmissionsToSheet(
     'CreatedAt',
     'Work Types',
     'Content Updates',
-    'Work Summary'
+    'Work Summary',
+    'Forum Count',
+    'Video PPT Count',
+    'Profile Count',
+    'Link Count'
   ];
 
   try {
@@ -138,7 +142,11 @@ export async function appendSubmissionsToSheet(
         createdAt,
         (work.workTypes || []).join(', '),
         (work.contentUpdates || []).join(', '),
-        work.workSummary || ''
+        work.workSummary || '',
+        (work.forumCount ?? 0).toString(),
+        (work.videoPptCount ?? 0).toString(),
+        (work.profileCount ?? 0).toString(),
+        (work.linkCount ?? 0).toString()
       ];
     });
 
@@ -173,7 +181,7 @@ export async function fetchSubmissionsFromSheet(
   token: string
 ): Promise<DSREntry[]> {
   const cleanId = extractSpreadsheetId(spreadsheetId);
-  const range = encodeURIComponent(`${sheetName}!A1:O2000`);
+  const range = encodeURIComponent(`${sheetName}!A1:S2000`);
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${cleanId}/values/${range}`;
 
   try {
@@ -202,7 +210,7 @@ export async function fetchSubmissionsFromSheet(
     // First row is headers:
     // 0: DSR ID, 1: Reporting Date, 2: User Email, 3: Project ID, 4: Project Name,
     // 5: Listing, 6: Blog, 7: PDF, 8: Image, 9: Work Narrative, 10: Custom Values JSON, 11: CreatedAt
-    // 12: Work Types, 13: Content Updates, 14: Work Summary
+    // 12: Work Types, 13: Content Updates, 14: Work Summary, 15: Forum, 16: Video PPT, 17: Profile, 18: Link
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
       if (!row[0] || !row[1] || !row[2]) continue;
@@ -233,6 +241,10 @@ export async function fetchSubmissionsFromSheet(
       const workTypes = row[12] ? row[12].split(',').map((s: string) => s.trim()).filter(Boolean) : [];
       const contentUpdates = row[13] ? row[13].split(',').map((s: string) => s.trim()).filter(Boolean) : [];
       const workSummary = row[14] || '';
+      const forumCount = parseInt(row[15], 10) || 0;
+      const videoPptCount = parseInt(row[16], 10) || 0;
+      const profileCount = parseInt(row[17], 10) || 0;
+      const linkCount = parseInt(row[18], 10) || 0;
 
       const workItem: ProjectWork = {
         id: subBlockId,
@@ -240,8 +252,12 @@ export async function fetchSubmissionsFromSheet(
         projectName,
         listingCount,
         blogCount,
+        forumCount,
         pdfCount,
         imageCount,
+        videoPptCount,
+        profileCount,
+        linkCount,
         blog: blogNarrative,
         customValues,
         workTypes,

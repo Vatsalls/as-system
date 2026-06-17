@@ -14,7 +14,11 @@ import {
   Image,
   CheckCircle2,
   Files,
-  FileText
+  FileText,
+  MessageSquare,
+  Presentation,
+  User,
+  Link
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -44,8 +48,12 @@ export default function DSRForm({
       projectName: projects[0]?.name || '',
       listingCount: '',
       blogCount: '',
+      forumCount: '',
       pdfCount: '',
       imageCount: '',
+      videoPptCount: '',
+      profileCount: '',
+      linkCount: '',
       blog: '',
       customValues: {},
       workTypes: ['seo_backlink'], // default to SEO backlink submission
@@ -83,8 +91,12 @@ export default function DSRForm({
         projectName: projects[0]?.name || '',
         listingCount: '',
         blogCount: '',
+        forumCount: '',
         pdfCount: '',
         imageCount: '',
+        videoPptCount: '',
+        profileCount: '',
+        linkCount: '',
         blog: '',
         customValues: {},
         workTypes: ['seo_backlink'],
@@ -131,10 +143,17 @@ export default function DSRForm({
 
     const listingCount = hasSEO ? parseVal(work.listingCount) : 0;
     const blogCount = hasSEO ? parseVal(work.blogCount) : 0;
+    const forumCount = hasSEO ? parseVal(work.forumCount) : 0;
     const pdfCount = hasSEO ? parseVal(work.pdfCount) : 0;
     const imageCount = hasSEO ? parseVal(work.imageCount) : 0;
+    const videoPptCount = hasSEO ? parseVal(work.videoPptCount) : 0;
+    const profileCount = hasSEO ? parseVal(work.profileCount) : 0;
+    const linkCount = hasSEO ? parseVal(work.linkCount) : 0;
 
-    if (hasSEO && (isNaN(listingCount) || isNaN(blogCount) || isNaN(pdfCount) || isNaN(imageCount))) {
+    if (hasSEO && (
+      isNaN(listingCount) || isNaN(blogCount) || isNaN(forumCount) || isNaN(pdfCount) ||
+      isNaN(imageCount) || isNaN(videoPptCount) || isNaN(profileCount) || isNaN(linkCount)
+    )) {
       setValidationError('Please enter a valid number for all count inputs under SEO Backlink Submission.');
       return;
     }
@@ -164,8 +183,12 @@ export default function DSRForm({
         projectName: work.projectName,
         listingCount,
         blogCount,
+        forumCount,
         pdfCount,
         imageCount,
+        videoPptCount,
+        profileCount,
+        linkCount,
         blog: work.blog || '',
         customValues: cleanCustomValues,
         workTypes,
@@ -224,12 +247,6 @@ export default function DSRForm({
         </motion.div>
       ) : (
         <>
-          {validationError && (
-            <div className="p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-800 rounded-r-xl text-sm font-semibold shadow-xs animate-shake">
-              {validationError}
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Date Selector Row */}
             <div className="bg-white p-6 rounded-2xl border border-gray-150 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -243,7 +260,7 @@ export default function DSRForm({
                     Any Date Allowed
                   </span>
                 </div>
-                <p className="text-xs text-secondary-text text-gray-500 font-medium">Pick any past, current, or custom date to register your task work logs historically.</p>
+
               </div>
               <div className="flex items-center gap-2">
                 <input
@@ -278,7 +295,7 @@ export default function DSRForm({
                       </span>
                       <div>
                         <h4 className="font-bold text-gray-900 text-sm">Project Work Allocation Block</h4>
-                        <p className="text-[10px] text-gray-400">Log task details, count inputs, and attached deliverables.</p>
+
                       </div>
                     </div>
                   </div>
@@ -311,271 +328,342 @@ export default function DSRForm({
                           <PenTool size={12} className="shrink-0" />
                         </div>
                         <h5 className="text-xs font-black text-gray-700 uppercase tracking-wider">Select Work Type</h5>
-                      </div>
-
-                      {/* Work Types Toggle Grid */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* SEO Backlink Option Card */}
-                        <label
-                          className={`relative flex items-start gap-3.5 p-4.5 rounded-2xl border cursor-pointer select-none transition ${
-                            (work.workTypes || []).includes('seo_backlink')
-                              ? 'border-indigo-600 bg-indigo-50/20 ring-1 ring-indigo-600'
-                              : 'border-gray-200 bg-white hover:bg-gray-50'
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={(work.workTypes || []).includes('seo_backlink')}
-                            onChange={() => {
-                              const current = work.workTypes || [];
-                              const next = current.includes('seo_backlink')
-                                ? current.filter((t: string) => t !== 'seo_backlink')
-                                : [...current, 'seo_backlink'];
-                              handleUpdateWorkBlock(idx, { workTypes: next });
-                            }}
-                            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1 cursor-pointer"
-                          />
-                          <div className="space-y-0.5">
-                            <span className="block text-xs font-bold text-gray-900">SEO Backlink Submission</span>
-                            <span className="block text-[10px] text-gray-400 font-medium">Log submission counts for listings, blogs, PDFs, and images.</span>
-                          </div>
-                        </label>
-
-                        {/* Content Update Option Card */}
-                        <label
-                          className={`relative flex items-start gap-3.5 p-4.5 rounded-2xl border cursor-pointer select-none transition ${
-                            (work.workTypes || []).includes('content_update')
-                              ? 'border-indigo-600 bg-indigo-50/20 ring-1 ring-indigo-600'
-                              : 'border-gray-200 bg-white hover:bg-gray-50'
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={(work.workTypes || []).includes('content_update')}
-                            onChange={() => {
-                              const current = work.workTypes || [];
-                              const next = current.includes('content_update')
-                                ? current.filter((t: string) => t !== 'content_update')
-                                : [...current, 'content_update'];
-                              handleUpdateWorkBlock(idx, { workTypes: next });
-                            }}
-                            className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1 cursor-pointer"
-                          />
-                          <div className="space-y-0.5">
-                            <span className="block text-xs font-bold text-gray-900">Content Update</span>
-                            <span className="block text-[10px] text-gray-400 font-medium">Select multiple checkboxes such as meta tags, keywords, restructure logs.</span>
-                          </div>
-                        </label>
-                      </div>
-
-                      {/* Dynamic Content Panel 1: SEO Backlink Submission Counts */}
-                      {(work.workTypes || []).includes('seo_backlink') && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="border border-indigo-100 bg-indigo-50/10 rounded-2xl p-5 space-y-4"
-                        >
-                          <span className="block text-[10px] font-extrabold text-indigo-950 uppercase tracking-widest">
-                            🚀 SEO Submission Quantities
-                          </span>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {/* Listing count */}
-                            <div className="space-y-1 bg-white p-4 rounded-xl border border-gray-150 shadow-2xs">
-                              <label htmlFor={`listing-cnt-${idx}`} className="block text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                                <Hash size={13} className="text-indigo-600" />
-                                Listing
-                              </label>
-                              <p className="text-[10px] text-gray-400 font-medium">Directory or listing count</p>
-                              <input
-                                id={`listing-cnt-${idx}`}
-                                type="number"
-                                placeholder="0"
-                                value={work.listingCount}
-                                onChange={(e) => {
-                                  handleUpdateWorkBlock(idx, { listingCount: e.target.value });
-                                }}
-                                className="w-full mt-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono"
-                              />
+                      </div>                      {/* Work Types Toggle List - Stacked Vertically with Inline Dynamic Panels */}
+                      <div className="flex flex-col gap-6">
+                        
+                        {/* 1. SEO Backlink block */}
+                        <div className="space-y-3">
+                          {/* SEO Backlink Option Card */}
+                          <label
+                            className={`relative flex items-start gap-3.5 p-4.5 rounded-2xl border cursor-pointer select-none transition ${
+                              (work.workTypes || []).includes('seo_backlink')
+                                ? 'border-indigo-600 bg-indigo-50/20 ring-1 ring-indigo-600'
+                                : 'border-gray-200 bg-white hover:bg-gray-50'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={(work.workTypes || []).includes('seo_backlink')}
+                              onChange={() => {
+                                const current = work.workTypes || [];
+                                const next = current.includes('seo_backlink')
+                                  ? current.filter((t: string) => t !== 'seo_backlink')
+                                  : [...current, 'seo_backlink'];
+                                handleUpdateWorkBlock(idx, { workTypes: next });
+                              }}
+                              className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1 cursor-pointer"
+                            />
+                            <div className="space-y-0.5">
+                              <span className="block text-xs font-bold text-gray-900">SEO Backlink Submission</span>
+                              <span className="block text-[10px] text-gray-400 font-medium">Log submission counts for listings, blogs, PDFs, and images.</span>
                             </div>
+                          </label>
 
-                            {/* Blog count */}
-                            <div className="space-y-1 bg-white p-4 rounded-xl border border-gray-150 shadow-2xs">
-                              <label htmlFor={`blog-cnt-${idx}`} className="block text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                                <PenTool size={13} className="text-indigo-600" />
-                                Blog
-                              </label>
-                              <p className="text-[10px] text-gray-400 font-medium">Blogs created or linked</p>
-                              <input
-                                id={`blog-cnt-${idx}`}
-                                type="number"
-                                placeholder="0"
-                                value={work.blogCount}
-                                onChange={(e) => {
-                                  handleUpdateWorkBlock(idx, { blogCount: e.target.value });
-                                }}
-                                className="w-full mt-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono"
-                              />
-                            </div>
+                          {/* Dynamic Content Panel 1: SEO Backlink Submission Counts */}
+                          {(work.workTypes || []).includes('seo_backlink') && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.98 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="border border-indigo-100 bg-indigo-50/10 rounded-2xl p-5 space-y-4"
+                            >
+                              <span className="block text-[10px] font-extrabold text-indigo-950 uppercase tracking-widest">
+                                🚀 SEO Submission Quantities
+                              </span>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                {/* 1. Blogs / Articles count */}
+                                <div className="flex items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-gray-150 shadow-2xs">
+                                  <label htmlFor={`blog-cnt-${idx}`} className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0 select-none">
+                                    <PenTool size={13} className="text-indigo-600 shrink-0" />
+                                    Blog / Article
+                                  </label>
+                                  <input
+                                    id={`blog-cnt-${idx}`}
+                                    type="number"
+                                    placeholder="0"
+                                    value={work.blogCount}
+                                    onChange={(e) => {
+                                      handleUpdateWorkBlock(idx, { blogCount: e.target.value });
+                                    }}
+                                    className="w-20 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono text-center"
+                                  />
+                                </div>
 
-                            {/* PDF count */}
-                            <div className="space-y-1 bg-white p-4 rounded-xl border border-gray-150 shadow-2xs">
-                              <label htmlFor={`pdf-cnt-${idx}`} className="block text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                                <FileText size={13} className="text-indigo-600" />
-                                PDF
-                              </label>
-                              <p className="text-[10px] text-gray-400 font-medium">PDF documents shared</p>
-                              <input
-                                id={`pdf-cnt-${idx}`}
-                                type="number"
-                                placeholder="0"
-                                value={work.pdfCount}
-                                onChange={(e) => {
-                                  handleUpdateWorkBlock(idx, { pdfCount: e.target.value });
-                                }}
-                                className="w-full mt-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono"
-                              />
-                            </div>
+                                {/* 2. Listing count */}
+                                <div className="flex items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-gray-150 shadow-2xs">
+                                  <label htmlFor={`listing-cnt-${idx}`} className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0 select-none">
+                                    <Hash size={13} className="text-indigo-600 shrink-0" />
+                                    Listings
+                                  </label>
+                                  <input
+                                    id={`listing-cnt-${idx}`}
+                                    type="number"
+                                    placeholder="0"
+                                    value={work.listingCount}
+                                    onChange={(e) => {
+                                      handleUpdateWorkBlock(idx, { listingCount: e.target.value });
+                                    }}
+                                    className="w-20 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono text-center"
+                                  />
+                                </div>
 
-                            {/* Image count */}
-                            <div className="space-y-1 bg-white p-4 rounded-xl border border-gray-150 shadow-2xs">
-                              <label htmlFor={`image-cnt-${idx}`} className="block text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                                <Image size={13} className="text-indigo-600" />
-                                Image
-                              </label>
-                              <p className="text-[10px] text-gray-400 font-medium">Screenshots & images</p>
-                              <input
-                                id={`image-cnt-${idx}`}
-                                type="number"
-                                placeholder="0"
-                                value={work.imageCount}
-                                onChange={(e) => {
-                                  handleUpdateWorkBlock(idx, { imageCount: e.target.value });
-                                }}
-                                className="w-full mt-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono"
-                              />
-                            </div>
+                                {/* 3. Forum count */}
+                                <div className="flex items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-gray-150 shadow-2xs">
+                                  <label htmlFor={`forum-cnt-${idx}`} className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0 select-none">
+                                    <MessageSquare size={13} className="text-indigo-600" />
+                                    Forum
+                                  </label>
+                                  <input
+                                    id={`forum-cnt-${idx}`}
+                                    type="number"
+                                    placeholder="0"
+                                    value={work.forumCount}
+                                    onChange={(e) => {
+                                      handleUpdateWorkBlock(idx, { forumCount: e.target.value });
+                                    }}
+                                    className="w-20 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono text-center"
+                                  />
+                                </div>
 
-                            {/* Custom Dynamic Submission fields */}
-                            {customSubmissionTypes.map((type) => (
-                              <div key={type.id} className="space-y-1 bg-white p-4 rounded-xl border border-indigo-150 shadow-2xs">
-                                <label htmlFor={`custom-cnt-${type.id}-${idx}`} className="block text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 truncate">
-                                  <Hash size={13} className="text-purple-600 shrink-0" />
-                                  {type.name}
-                                </label>
-                                <p className="text-[10px] text-gray-400 font-medium truncate">{type.code} count</p>
-                                <input
-                                  id={`custom-cnt-${type.id}-${idx}`}
-                                  type="number"
-                                  placeholder="0"
-                                  value={work.customValues?.[type.id] !== undefined ? work.customValues[type.id] : ''}
-                                  onChange={(e) => {
-                                    const nextCustomValues = {
-                                      ...(work.customValues || {}),
-                                      [type.id]: e.target.value
-                                    };
-                                    handleUpdateWorkBlock(idx, { customValues: nextCustomValues });
-                                  }}
-                                  className="w-full mt-1.5 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono"
-                                />
+                                {/* 4. PDF count */}
+                                <div className="flex items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-gray-150 shadow-2xs">
+                                  <label htmlFor={`pdf-cnt-${idx}`} className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0 select-none text-ellipsis overflow-hidden">
+                                    <FileText size={13} className="text-indigo-600 shrink-0" />
+                                    PDF
+                                  </label>
+                                  <input
+                                    id={`pdf-cnt-${idx}`}
+                                    type="number"
+                                    placeholder="0"
+                                    value={work.pdfCount}
+                                    onChange={(e) => {
+                                      handleUpdateWorkBlock(idx, { pdfCount: e.target.value });
+                                    }}
+                                    className="w-20 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono text-center"
+                                  />
+                                </div>
+
+                                {/* 5. Image count */}
+                                <div className="flex items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-gray-150 shadow-2xs">
+                                  <label htmlFor={`image-cnt-${idx}`} className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0 select-none">
+                                    <Image size={13} className="text-indigo-600 shrink-0" />
+                                    Images
+                                  </label>
+                                  <input
+                                    id={`image-cnt-${idx}`}
+                                    type="number"
+                                    placeholder="0"
+                                    value={work.imageCount}
+                                    onChange={(e) => {
+                                      handleUpdateWorkBlock(idx, { imageCount: e.target.value });
+                                    }}
+                                    className="w-20 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono text-center"
+                                  />
+                                </div>
+
+                                {/* 6. Video PPT count */}
+                                <div className="flex items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-gray-150 shadow-2xs">
+                                  <label htmlFor={`videoppt-cnt-${idx}`} className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0 select-none">
+                                    <Presentation size={13} className="text-indigo-600 shrink-0" />
+                                    Video / PPT
+                                  </label>
+                                  <input
+                                    id={`videoppt-cnt-${idx}`}
+                                    type="number"
+                                    placeholder="0"
+                                    value={work.videoPptCount}
+                                    onChange={(e) => {
+                                      handleUpdateWorkBlock(idx, { videoPptCount: e.target.value });
+                                    }}
+                                    className="w-20 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono text-center"
+                                  />
+                                </div>
+
+                                {/* 7. Profile count */}
+                                <div className="flex items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-gray-150 shadow-2xs">
+                                  <label htmlFor={`profile-cnt-${idx}`} className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0 select-none">
+                                    <User size={13} className="text-indigo-600 shrink-0" />
+                                    Profile
+                                  </label>
+                                  <input
+                                    id={`profile-cnt-${idx}`}
+                                    type="number"
+                                    placeholder="0"
+                                    value={work.profileCount}
+                                    onChange={(e) => {
+                                      handleUpdateWorkBlock(idx, { profileCount: e.target.value });
+                                    }}
+                                    className="w-20 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono text-center"
+                                  />
+                                </div>
+
+                                {/* 8. Link count */}
+                                <div className="flex items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-gray-150 shadow-2xs">
+                                  <label htmlFor={`link-cnt-${idx}`} className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0 select-none">
+                                    <Link size={13} className="text-indigo-600 shrink-0" />
+                                    Links
+                                  </label>
+                                  <input
+                                    id={`link-cnt-${idx}`}
+                                    type="number"
+                                    placeholder="0"
+                                    value={work.linkCount}
+                                    onChange={(e) => {
+                                      handleUpdateWorkBlock(idx, { linkCount: e.target.value });
+                                    }}
+                                    className="w-20 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-305 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono text-center"
+                                  />
+                                </div>
+
+                                {/* Custom Dynamic Submission fields */}
+                                {customSubmissionTypes.map((type) => (
+                                  <div key={type.id} className="flex items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-indigo-150 shadow-2xs">
+                                    <label htmlFor={`custom-cnt-${type.id}-${idx}`} className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0 select-none truncate">
+                                      <Hash size={13} className="text-purple-600 shrink-0" />
+                                      {type.name}
+                                    </label>
+                                    <input
+                                      id={`custom-cnt-${type.id}-${idx}`}
+                                      type="number"
+                                      placeholder="0"
+                                      value={work.customValues?.[type.id] !== undefined ? work.customValues[type.id] : ''}
+                                      onChange={(e) => {
+                                        const nextCustomValues = {
+                                          ...(work.customValues || {}),
+                                          [type.id]: e.target.value
+                                        };
+                                        handleUpdateWorkBlock(idx, { customValues: nextCustomValues });
+                                      }}
+                                      className="w-20 px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-950 font-bold placeholder-gray-350 focus:outline-none focus:ring-1 focus:ring-indigo-600 transition text-sm font-mono text-center"
+                                    />
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </motion.div>
-                      )}
+                            </motion.div>
+                          )}
+                        </div>
 
-                      {/* Dynamic Content Panel 2: Content Update Checkboxes */}
-                      {(work.workTypes || []).includes('content_update') && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="border border-purple-100 bg-purple-50/10 rounded-2xl p-5 space-y-4"
-                        >
-                          <div className="space-y-0.5">
-                            <span className="block text-[10px] font-extrabold text-purple-950 uppercase tracking-widest">
-                              ✍️ Content Update Checklist
-                            </span>
-                            <p className="text-[10px] text-gray-400 font-medium">Select multiple configurations completed during this shift:</p>
-                          </div>
+                        {/* 2. Content Update block */}
+                        <div className="space-y-3">
+                          {/* Content Update Option Card */}
+                          <label
+                            className={`relative flex items-start gap-3.5 p-4.5 rounded-2xl border cursor-pointer select-none transition ${
+                              (work.workTypes || []).includes('content_update')
+                                ? 'border-indigo-600 bg-indigo-50/20 ring-1 ring-indigo-600'
+                                : 'border-gray-200 bg-white hover:bg-gray-50'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={(work.workTypes || []).includes('content_update')}
+                              onChange={() => {
+                                const current = work.workTypes || [];
+                                const next = current.includes('content_update')
+                                  ? current.filter((t: string) => t !== 'content_update')
+                                  : [...current, 'content_update'];
+                                handleUpdateWorkBlock(idx, { workTypes: next });
+                              }}
+                              className="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mt-1 cursor-pointer"
+                            />
+                            <div className="space-y-0.5">
+                              <span className="block text-xs font-bold text-gray-900">Content Update</span>
+                              <span className="block text-[10px] text-gray-400 font-medium">Select multiple checkboxes such as meta tags, keywords, restructure logs.</span>
+                            </div>
+                          </label>
 
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-white p-4.5 rounded-xl border border-purple-100 shadow-2xs">
-                            {/* Checkbox 1: Meta Title & Description */}
-                            <label className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition select-none">
-                              <input
-                                type="checkbox"
-                                checked={(work.contentUpdates || []).includes('meta_title_desc')}
-                                onChange={() => {
-                                  const current = work.contentUpdates || [];
-                                  const next = current.includes('meta_title_desc')
-                                    ? current.filter((o: string) => o !== 'meta_title_desc')
-                                    : [...current, 'meta_title_desc'];
-                                  handleUpdateWorkBlock(idx, { contentUpdates: next });
-                                }}
-                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-505 border-gray-300 cursor-pointer"
-                              />
-                              <span className="text-xs font-bold text-gray-800">Meta Title & Description</span>
-                            </label>
+                          {/* Dynamic Content Panel 2: Content Update Checkboxes */}
+                          {(work.workTypes || []).includes('content_update') && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.98 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="border border-purple-100 bg-purple-50/10 rounded-2xl p-5 space-y-4"
+                            >
+                              <div className="space-y-0.5">
+                                <span className="block text-[10px] font-extrabold text-purple-950 uppercase tracking-widest">
+                                  ✍️ Content Update Checklist
+                                </span>
+                              </div>
 
-                            {/* Checkbox 2: Keyword Update */}
-                            <label className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition select-none">
-                              <input
-                                type="checkbox"
-                                checked={(work.contentUpdates || []).includes('keyword_update')}
-                                onChange={() => {
-                                  const current = work.contentUpdates || [];
-                                  const next = current.includes('keyword_update')
-                                    ? current.filter((o: string) => o !== 'keyword_update')
-                                    : [...current, 'keyword_update'];
-                                  handleUpdateWorkBlock(idx, { contentUpdates: next });
-                                }}
-                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-505 border-gray-300 cursor-pointer"
-                              />
-                              <span className="text-xs font-bold text-gray-800">Keyword Update</span>
-                            </label>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 bg-white p-4.5 rounded-xl border border-purple-100 shadow-2xs">
+                                {/* Checkbox 1: Meta Title & Description */}
+                                <label className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={(work.contentUpdates || []).includes('meta_title_desc')}
+                                    onChange={() => {
+                                      const current = work.contentUpdates || [];
+                                      const next = current.includes('meta_title_desc')
+                                        ? current.filter((o: string) => o !== 'meta_title_desc')
+                                        : [...current, 'meta_title_desc'];
+                                      handleUpdateWorkBlock(idx, { contentUpdates: next });
+                                    }}
+                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-505 border-gray-300 cursor-pointer"
+                                  />
+                                  <span className="text-xs font-bold text-gray-800">Meta Title & Description</span>
+                                </label>
 
-                            {/* Checkbox 3: Section Update */}
-                            <label className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition select-none">
-                              <input
-                                type="checkbox"
-                                checked={(work.contentUpdates || []).includes('section_update')}
-                                onChange={() => {
-                                  const current = work.contentUpdates || [];
-                                  const next = current.includes('section_update')
-                                    ? current.filter((o: string) => o !== 'section_update')
-                                    : [...current, 'section_update'];
-                                  handleUpdateWorkBlock(idx, { contentUpdates: next });
-                                }}
-                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-505 border-gray-300 cursor-pointer"
-                              />
-                              <span className="text-xs font-bold text-gray-800">Section Update</span>
-                            </label>
+                                {/* Checkbox 2: Keyword Update */}
+                                <label className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={(work.contentUpdates || []).includes('keyword_update')}
+                                    onChange={() => {
+                                      const current = work.contentUpdates || [];
+                                      const next = current.includes('keyword_update')
+                                        ? current.filter((o: string) => o !== 'keyword_update')
+                                        : [...current, 'keyword_update'];
+                                      handleUpdateWorkBlock(idx, { contentUpdates: next });
+                                    }}
+                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-505 border-gray-300 cursor-pointer"
+                                  />
+                                  <span className="text-xs font-bold text-gray-800">Keyword Update</span>
+                                </label>
 
-                            {/* Checkbox 4: Restructure */}
-                            <label className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition select-none">
-                              <input
-                                type="checkbox"
-                                checked={(work.contentUpdates || []).includes('restructure')}
-                                onChange={() => {
-                                  const current = work.contentUpdates || [];
-                                  const next = current.includes('restructure')
-                                    ? current.filter((o: string) => o !== 'restructure')
-                                    : [...current, 'restructure'];
-                                  handleUpdateWorkBlock(idx, { contentUpdates: next });
-                                }}
-                                className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-505 border-gray-300 cursor-pointer"
-                              />
-                              <span className="text-xs font-bold text-gray-800">Restructure</span>
-                            </label>
-                          </div>
-                        </motion.div>
-                      )}
+                                {/* Checkbox 3: Section Update */}
+                                <label className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={(work.contentUpdates || []).includes('section_update')}
+                                    onChange={() => {
+                                      const current = work.contentUpdates || [];
+                                      const next = current.includes('section_update')
+                                        ? current.filter((o: string) => o !== 'section_update')
+                                        : [...current, 'section_update'];
+                                      handleUpdateWorkBlock(idx, { contentUpdates: next });
+                                    }}
+                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-505 border-gray-300 cursor-pointer"
+                                  />
+                                  <span className="text-xs font-bold text-gray-800">Section Update</span>
+                                </label>
+
+                                {/* Checkbox 4: Restructure */}
+                                <label className="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-lg cursor-pointer transition select-none">
+                                  <input
+                                    type="checkbox"
+                                    checked={(work.contentUpdates || []).includes('restructure')}
+                                    onChange={() => {
+                                      const current = work.contentUpdates || [];
+                                      const next = current.includes('restructure')
+                                        ? current.filter((o: string) => o !== 'restructure')
+                                        : [...current, 'restructure'];
+                                      handleUpdateWorkBlock(idx, { contentUpdates: next });
+                                    }}
+                                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-505 border-gray-300 cursor-pointer"
+                                  />
+                                  <span className="text-xs font-bold text-gray-800">Restructure</span>
+                                </label>
+                              </div>
+                            </motion.div>
+                          )}
+                        </div>
+
+                      </div>
 
                       {/* Row 3: Work Summary / Work Type note section to write anything */}
                       <div className="space-y-2">
                         <label htmlFor={`work-summary-${idx}`} className="block text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
                           📝 Work Notes / Summary
                         </label>
-                        <p className="text-[10px] text-gray-400 font-medium">Add general comments, specific URLs, backlinks listing text, or relevant notes regarding this allocation.</p>
                         <textarea
                           id={`work-summary-${idx}`}
                           rows={3}
@@ -591,6 +679,12 @@ export default function DSRForm({
                 </div>
               ))}
             </div>
+
+            {validationError && (
+              <div className="p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-800 rounded-r-xl text-sm font-semibold shadow-xs animate-shake">
+                {validationError}
+              </div>
+            )}
 
             {/* Submit Actions Panel */}
             <div className="flex justify-end items-center gap-4 pt-4">
